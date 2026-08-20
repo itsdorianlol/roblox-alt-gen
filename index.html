@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roblox Alt Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="app-wrapper">
+
+  <!-- ── Hero ─────────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-orb orb-1"></div>
+    <div class="hero-orb orb-2"></div>
+
+    <div class="hero-badge">
+      <span class="dot"></span>
+      Free • Proxy Rotation • Captcha Support
+    </div>
+
+    <h1 class="hero-title">
+      <span id="hero-typewriter"></span><span class="cursor"></span>
+    </h1>
+
+    <p class="hero-sub">
+      Generate Roblox alt accounts with automatic proxy rotation and captcha solving.
+    </p>
+  </section>
+
+  <!-- ── Main grid ──────────────────────────────────────────────── -->
+  <div class="main-grid">
+
+    <!-- ── Settings panel ── -->
+    <div class="glass settings-panel">
+      <p class="panel-title">⚙ Settings</p>
+
+      <!-- Count + Delay -->
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label" for="count">Accounts</label>
+          <input class="field-input" type="number" id="count" value="5" min="1" max="200" />
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="delay">Delay (sec)</label>
+          <input class="field-input" type="number" id="delay" value="2" min="0.5" step="0.5" />
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Captcha solver -->
+      <p class="panel-title">🤖 Captcha Solver</p>
+
+      <div class="field-group">
+        <label class="field-label" for="solver-service">Service</label>
+        <select class="field-input" id="solver-service">
+          <option value="">None (no captcha solving)</option>
+          <option value="2captcha">2captcha</option>
+          <option value="capmonster">CapMonster</option>
+        </select>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="solver-key">API Key</label>
+        <div class="password-wrap">
+          <input class="field-input" type="password" id="solver-key" placeholder="Paste API key…" />
+          <button class="toggle-btn" id="toggle-key" title="Show/hide key">👁</button>
+        </div>
+        <div class="solver-status" id="solver-status">No API key — captcha challenges will fail</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Proxies -->
+      <p class="panel-title">🔁 Proxies</p>
+
+      <div class="proxy-count-badge" id="proxy-badge">
+        ○ No proxies loaded
+      </div>
+
+      <button class="btn btn-outline btn-sm" id="btn-fetch-proxies" style="margin-bottom:12px;width:100%;">
+        🌐 Auto-Fetch Free Proxies
+      </button>
+
+      <div class="field-group">
+        <label class="field-label" for="proxy-paste">Or paste proxies (one per line)</label>
+        <textarea class="field-input" id="proxy-paste" placeholder="http://1.2.3.4:8080&#10;socks5://user:pass@host:port"></textarea>
+        <button class="btn btn-ghost btn-sm" id="btn-apply-proxies" style="margin-top:8px;">Apply Proxies</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Generate / Stop -->
+      <button class="btn btn-primary" id="btn-generate">
+        <span class="btn-text">▶ &nbsp;Generate Accounts</span>
+        <span class="btn-spinner"></span>
+      </button>
+
+      <button class="btn btn-ghost" id="btn-stop" style="margin-top:10px;" disabled>
+        ■ &nbsp;Stop
+      </button>
+
+      <!-- Status -->
+      <div class="status-line">
+        <span class="status-dot" id="status-dot"></span>
+        <span id="status-text">Idle</span>
+      </div>
+
+      <div class="proxy-stats" id="proxy-stats"></div>
+    </div>
+
+    <!-- ── Accounts panel ── -->
+    <div class="glass accounts-panel">
+      <div class="panel-header">
+        <p class="panel-title" style="margin:0;">📋 Generated Accounts</p>
+        <span class="count-badge" id="count-badge">0 accounts</span>
+      </div>
+
+      <!-- Table -->
+      <table class="accounts-table" id="accounts-table">
+        <thead>
+          <tr>
+            <th class="col-index">#</th>
+            <th class="col-username">Username</th>
+            <th class="col-status">Status</th>
+            <th class="col-time">Time</th>
+          </tr>
+        </thead>
+        <tbody id="accounts-body">
+        </tbody>
+      </table>
+
+      <!-- Empty state -->
+      <div class="empty-state" id="empty-state">
+        <span class="empty-icon">🎮</span>
+        <span>No accounts yet — hit Generate to start</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Credential Modal ── -->
+<div class="modal-overlay hidden" id="modal-overlay">
+  <div class="modal-card glass">
+    <div class="modal-title">
+      🔑 Account Details
+      <button class="modal-close" id="modal-close">✕</button>
+    </div>
+
+    <div class="cred-field">
+      <div class="cred-label">Username</div>
+      <div class="cred-row">
+        <span class="cred-value" id="modal-username">—</span>
+        <button class="copy-btn" data-copy="username">Copy</button>
+      </div>
+    </div>
+
+    <div class="cred-field">
+      <div class="cred-label">Password</div>
+      <div class="cred-row">
+        <span class="cred-value" id="modal-password">—</span>
+        <button class="copy-btn" data-copy="password">Copy</button>
+      </div>
+    </div>
+
+    <div class="cred-field">
+      <div class="cred-label">Status</div>
+      <div class="cred-row">
+        <span class="cred-value" id="modal-status">—</span>
+      </div>
+    </div>
+
+    <div class="cred-field" id="modal-error-wrap" style="display:none;">
+      <div class="cred-label">Error</div>
+      <div class="cred-row">
+        <span class="cred-value" id="modal-error" style="color:#888;font-size:12px;">—</span>
+      </div>
+    </div>
+
+    <div class="cred-field">
+      <div class="cred-label">Created</div>
+      <div class="cred-row">
+        <span class="cred-value" id="modal-time">—</span>
+      </div>
+    </div>
+
+    <div class="modal-copy-all">
+      <button class="btn btn-primary" id="btn-copy-all">
+        📋 &nbsp;Copy username:password
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
